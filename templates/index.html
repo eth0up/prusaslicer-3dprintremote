@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta name="generator" content="Hugo 0.87.0">
+        <title>3DPrintRemote</title>
+        
+        <!-- <link rel="canonical" href="https://getbootstrap.com/docs/5.1/examples/navbar-fixed/"> -->
+        
+        
+        
+        <!-- Bootstrap core CSS -->
+        <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+        
+        <style>
+            .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            }
+            
+            @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+            font-size: 3.5rem;
+            }
+            }
+        </style>
+        
+        
+        <!-- Custom styles for this template -->
+        <link href="assets/css/navbar-top-fixed.css" rel="stylesheet">
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">3DPrintRemote</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="index" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="profiles">Profiles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="stls">Archived STL Printer</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="container">
+            <div class="bg-light p-5 rounded">
+                {% if model.Title %}
+                <br>
+                <h2>{{model.Title}}</h2>
+                {% endif %}
+                {% if model.Description %}
+				<h6>{{model.Description}}</h6>
+                {% endif %}
+                <br>
+                {% if model.Message %}
+                <div class="alert alert-primary" role="alert">
+                    {{model.Message}}
+                </div>
+                {% endif %}
+                {% if model.Error %}
+                <div class="alert alert-danger" role="alert">
+                    {{model.Error}}
+                </div>
+                {% endif %}
+                <form class="row g-3" method="post" action="/">
+                    <select class="form-control form-select col-md-1" id="profileSelect" value="{{model.Bag.profile}}" name="profile" aria-label="Profile selection" required>
+                        <option value="">Select a Profile</option>
+                        {% for profile in model.Bag.profiles %}
+                        {% if profile == model.Bag.profile %}
+                        <option value="{{profile}}" selected>{{profile}}</option>
+                        {% else %}
+                        <option value="{{profile}}">{{profile}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <div class="input-group mb-3">
+                        <input type="text" id="url" name="url" value="{{model.Bag.url}}" class="form-control" placeholder="URL" aria-label="STL File" required>
+                        <button type="submit" class="btn btn-primary" type="button" id="button">Fetch & Slice</button>
+                    </div>
+                    <div class="form-check form-switch">
+						<input class="form-check-input" type="checkbox" name="startprint" id="startprint" checked>
+						<label class="form-check-label" for="startprint">
+							Start printing after upload to Octoprint
+						</label>
+					</div>
+                </form> 
+            </div>
+        </main>
+        
+        <script src="assets/js/bootstrap.bundle.min.js"></script>
+        
+    </body>
+</html>
