@@ -102,12 +102,14 @@
 						</select>		
                         <button type="submit" class="btn btn-primary" type="button" id="button">Slice</button>
                     </div>					
+                    {% if model.Bag.OCTO_ENABLED %}
                     <div class="form-check form-switch">
 						<input class="form-check-input" type="checkbox" name="startprint" id="startprint" checked>
 						<label class="form-check-label" for="startprint">
 							Start printing after upload to Octoprint
 						</label>
 					</div>
+                    {% endif %}					
 				</form> 
             </div>
         </main>
