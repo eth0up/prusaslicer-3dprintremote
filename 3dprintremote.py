@@ -31,7 +31,7 @@ OCTO_APIKEY = "1234567890ABCDEFGHIJKLMNOPQRSTUV" # Octoprint API key found in Se
 
 @app.route('/')
 def downloadprint_form(): # "Home" tab
-    view_model = View("index", "STL Fetch & Slice", description="Fetch, Slice, Upload, and Print", bag={'profiles': get_profiles()})
+    view_model = View("index", "STL Fetch & Slice", description="Fetch, Slice, Upload, and Print", bag={'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED})
 
     return render_template('index.html', model=view_model)
 
@@ -45,11 +45,11 @@ def downloadprint_form_post():
     
     if not profile:
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
-                        {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, 'Error: Invalid form data')
+                        {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, 'Error: Invalid form data')
 
     if not is_url(url):
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
-                        {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, 'Error: Invalid URL')
+                        {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, 'Error: Invalid URL')
 
         return render_template('index.html', model=view_model)
         
@@ -58,7 +58,7 @@ def downloadprint_form_post():
 
     if not filename:
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
-                        {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, 'Error: Could not determine filename from the provided URL')
+                        {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, 'Error: Could not determine filename from the provided URL')
 
         return render_template('index.html', model=view_model)
 
@@ -68,13 +68,13 @@ def downloadprint_form_post():
 
     if gcode_fullpath is None:
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
-                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, 'Slicer Error: Gcode filename detection failed. Confirm that the source is a functional STL file.')
+                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, 'Slicer Error: Gcode filename detection failed. Confirm that the source is a functional STL file.')
                             
         return render_template('index.html', model=view_model)
         
     if completed_process.returncode != 0:
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
-                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, error = f'Slicer Error: STL slicing failed. {completed_process.stdout.decode("ascii")}... {completed_process.stderr.decode("ascii")}')
+                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, error = f'Slicer Error: STL slicing failed. {completed_process.stdout.decode("ascii")}... {completed_process.stderr.decode("ascii")}')
                             
         return render_template('index.html', model=view_model)
         
@@ -83,26 +83,26 @@ def downloadprint_form_post():
             octoprint_status = send_gcode_to_octoprint(gcode_fullpath, startprint)
         except Exception as e:
             view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
-                                {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, f'Octoprint Exception: {type(e)}: {e}')
+                                {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, f'Octoprint Exception: {type(e)}: {e}')
         else:
             view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", f'Octoprint Response: {octoprint_status}',
-                                {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, '')    
+                                {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, '')    
         
         cleanup_gcode(gcode_fullpath) # Delete the gcode file
     else:
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", f'Sliced {filename} to: {gcode_fullpath}',
-                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles()}, '')        
+                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, '')        
     
     return render_template('index.html', model=view_model)
     
 @app.route('/profiles') # "Profiles" tab
 def profiles_form():
-    view_model = View("profiles", "Slicer Profiles", "Available Profiles", bag={'profiles': get_profiles()})
+    view_model = View("profiles", "Slicer Profiles", "Available Profiles", bag={'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED})
     return render_template('profiles.html', model=view_model)
 
 @app.route('/stls') # "Archived STL Printer" tab
 def stls_form():
-    view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", bag={'stls': get_stls(), 'profiles': get_profiles()})
+    view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", bag={'stls': get_stls(), 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED})
     return render_template('stls.html', model=view_model)
     
 @app.route('/stls', methods=['POST']) # "Archived STL Printer" tab POST handling
@@ -116,13 +116,13 @@ def stlprint_form_post():
     # validate form input
     if not stl or not profile:
         view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
-                            {'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles()}, "Error: Invalid form data")
+                            {'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, "Error: Invalid form data")
         
         return render_template('stls.html', model=view_model)
 
     if not path.isfile(stl):
         view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
-                            {'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles()}, f'Error: {stl} not found in STL directory')
+                            {'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, f'Error: {stl} not found in STL directory')
         
         return render_template('stls.html', model=view_model)
         
@@ -132,13 +132,13 @@ def stlprint_form_post():
 
     if gcode_fullpath is None:
         view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
-                            {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles()}, error = 'Slicer Error: Gcode filename detection failed. Confirm that the source is a functional STL file.')
+                            {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, error = 'Slicer Error: Gcode filename detection failed. Confirm that the source is a functional STL file.')
 
         return render_template('stls.html', model=view_model)
     
     if completed_process.returncode != 0:
         view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
-                            {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles()}, error = f'Error: STL slicing failed! {completed_process.stdout.decode("ascii")}... {completed_process.stderr.decode("ascii")}')
+                            {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, error = f'Error: STL slicing failed! {completed_process.stdout.decode("ascii")}... {completed_process.stderr.decode("ascii")}')
 
         return render_template('stls.html', model=view_model)
 
@@ -147,15 +147,15 @@ def stlprint_form_post():
             octoprint_status = send_gcode_to_octoprint(gcode_fullpath, startprint)
         except Exception as e:
             view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
-                                {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles()}, f'Octoprint Exception: {type(e)}: {e}')
+                                {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, f'Octoprint Exception: {type(e)}: {e}')
         else:
             view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print",
-                                f'Octoprint Response: {octoprint_status}', {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles()}, '')
+                                f'Octoprint Response: {octoprint_status}', {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, '')
         
         cleanup_gcode(gcode_fullpath) # Delete the gcode file
     else:
         view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print",
-                            f'Sliced {filename} to: {gcode_fullpath}', {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles()}, '')        
+                            f'Sliced {filename} to: {gcode_fullpath}', {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, '')
 
     return render_template('stls.html', model=view_model)
     
