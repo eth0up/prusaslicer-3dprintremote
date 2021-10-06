@@ -104,7 +104,11 @@
                     </div>					
                     {% if model.Bag.OCTO_ENABLED %}
                     <div class="form-check form-switch">
+                        {% if model.Bag.startprint %}
 						<input class="form-check-input" type="checkbox" name="startprint" id="startprint" checked>
+                        {% else %}
+						<input class="form-check-input" type="checkbox" name="startprint" id="startprint">
+                        {% endif %}
 						<label class="form-check-label" for="startprint">
 							Start printing after upload to Octoprint
 						</label>
