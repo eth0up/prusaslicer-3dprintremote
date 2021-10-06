@@ -31,17 +31,15 @@ OCTO_APIKEY = "1234567890ABCDEFGHIJKLMNOPQRSTUV" # Octoprint API key found in Se
 
 @app.route('/')
 def downloadprint_form(): # "Home" tab
-    view_model = View("index", "STL Fetch & Slice", description="Fetch, Slice, Upload, and Print", bag={'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED})
+    view_model = View("index", "STL Fetch & Slice", description="Fetch, Slice, Upload, and Print", bag={'startprint': True, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED})
 
     return render_template('index.html', model=view_model)
 
 @app.route('/', methods=['POST']) # "Home" tab POST handling
 def downloadprint_form_post():
-    startprint = True
-    if request.form.get('startprint') is None: # Get "Start printing after upload" switch status
-        startprint = False
+    startprint = False if request.form.get('startprint') is None else True
     url = request.form['url']
-    profile = request.form['profile']  
+    profile = request.form['profile']
     
     if not profile:
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
@@ -102,14 +100,12 @@ def profiles_form():
 
 @app.route('/stls') # "Archived STL Printer" tab
 def stls_form():
-    view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", bag={'stls': get_stls(), 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED})
+    view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", bag={'stls': get_stls(), 'startprint': True, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED})
     return render_template('stls.html', model=view_model)
     
 @app.route('/stls', methods=['POST']) # "Archived STL Printer" tab POST handling
 def stlprint_form_post():
-    startprint = True
-    if request.form.get('startprint') is None: # Get "Start printing after upload" switch status
-        startprint = False
+    startprint = False if request.form.get('startprint') is None else True
     stl = request.form['stl']
     profile = request.form['profile']
    
@@ -226,6 +222,5 @@ def get_stls():
 def get_profiles():
 # Get list of profiles for display/selection within each tab
     return glob.glob(f'{ROOTPROFILESPATH}/*.ini', recursive=False)
-    
-    
+
 app.run(host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)
