@@ -151,7 +151,7 @@ def stlprint_form_post():
         cleanup_gcode(gcode_fullpath) # Delete the gcode file
     else:
         view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print",
-                            f'Sliced {filename} to: {gcode_fullpath}', {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, '')
+                            f'Sliced {stl} to: {gcode_fullpath}', {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, '')
 
     return render_template('stls.html', model=view_model)
     
