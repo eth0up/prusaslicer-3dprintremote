@@ -64,18 +64,18 @@ def downloadprint_form_post():
            
     gcode_fullpath, completed_process = send_stl_to_slicer(stl_file, profile)
 
-    if gcode_fullpath is None:
-        view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
-                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, 'Slicer Error: Gcode filename detection failed. Confirm that the source is a functional STL file.')
-                            
-        return render_template('index.html', model=view_model)
-        
     if completed_process.returncode != 0:
         view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
                             {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, error = f'Slicer Error: STL slicing failed. {completed_process.stdout.decode("ascii")}... {completed_process.stderr.decode("ascii")}')
                             
         return render_template('index.html', model=view_model)
-        
+
+    if gcode_fullpath is None:
+        view_model = View("index", "STL Fetch & Slice", "Fetch, Slice, Upload, and Print", '',
+                            {'startprint': startprint, 'url': url, 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, 'Slicer Error: Gcode filename detection failed. Confirm that the source is a functional STL file.')
+                            
+        return render_template('index.html', model=view_model)
+
     if OCTO_ENABLED: # Only send sliced gcode to Octoprint when Global var is True
         try:
             octoprint_status = send_gcode_to_octoprint(gcode_fullpath, startprint)
@@ -126,15 +126,15 @@ def stlprint_form_post():
 
     gcode_fullpath, completed_process = send_stl_to_slicer(stl_file, profile)
 
+    if completed_process.returncode != 0:
+        view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
+                            {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, error = f'Slicer Error: STL slicing failed. {completed_process.stdout.decode("ascii")}... {completed_process.stderr.decode("ascii")}')
+
+        return render_template('stls.html', model=view_model)
+
     if gcode_fullpath is None:
         view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
                             {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, error = 'Slicer Error: Gcode filename detection failed. Confirm that the source is a functional STL file.')
-
-        return render_template('stls.html', model=view_model)
-    
-    if completed_process.returncode != 0:
-        view_model = View("stls", "Archived STL Printer", "Slice previously-downloaded STLs, Upload, and Print", '',
-                            {'startprint': startprint, 'stl': stl, 'stls': get_stls(), 'profile': profile, 'profiles': get_profiles(), 'OCTO_ENABLED': OCTO_ENABLED}, error = f'Error: STL slicing failed! {completed_process.stdout.decode("ascii")}... {completed_process.stderr.decode("ascii")}')
 
         return render_template('stls.html', model=view_model)
 
